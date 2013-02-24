@@ -1,0 +1,5 @@
+librarian-puppet (0.9.8+ds-1) unstable; urgency=low
+
+  * Initial release (Closes: #698209)
+
+ -- Stig Sandbeck Mathisen <ssm@debian.org>  Sun, 24 Feb 2013 11:44:49 +0100
