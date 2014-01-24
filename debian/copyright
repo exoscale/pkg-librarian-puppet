@@ -1,6 +1,9 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: librarian-puppet
 Source: https://github.com/rodjek/librarian-puppet
+Files-Excluded:
+ vendor/*
+ .gitignore
 
 Files: *
 Copyright: 2012 Tim Sharpe

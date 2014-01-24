@@ -1,3 +1,16 @@
+librarian-puppet (0.9.10+dfsg-1) unstable; urgency=medium
+
+  [ Cédric Boutillier ]
+  * debian/control: remove obsolete DM-Upload-Allowed flag
+  * use canonical URI in Vcs-* fields
+
+  [ Stig Sandbeck Mathisen ]
+  * Imported upstream release 0.9.10 (Closes: #725914)
+  * Use Files-Excluded in debian/copyright
+  * Bump Standards-Version (no changes)
+
+ -- Stig Sandbeck Mathisen <ssm@debian.org>  Fri, 24 Jan 2014 09:05:41 +0100
+
 librarian-puppet (0.9.9+ds-1) unstable; urgency=low
 
   * New upstream version
