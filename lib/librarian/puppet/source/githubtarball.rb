@@ -1,5 +1,6 @@
 require 'uri'
 require 'net/https'
+require 'open-uri'
 require 'json'
 
 require 'librarian/puppet/version'
@@ -8,7 +9,12 @@ module Librarian
   module Puppet
     module Source
       class GitHubTarball
+        include Librarian::Puppet::Util
+
         class Repo
+          include Librarian::Puppet::Util
+
+          TOKEN_KEY = 'GITHUB_API_TOKEN'
 
           attr_accessor :source, :name
           private :source=, :name=
@@ -24,11 +30,7 @@ module Librarian
               raise Error, "Unable to find module '#{source.uri}' on https://github.com"
             end
 
-            all_versions = data.map { |r| r['name'] }.sort.reverse
-
-            all_versions = all_versions.map do |version|
-              version.gsub(/^v/, '')
-            end
+            all_versions = data.map { |r| r['name'].gsub(/^v/, '') }.sort.reverse
 
             all_versions.delete_if do |version|
               version !~ /\A\d\.\d(\.\d.*)?\z/
@@ -57,7 +59,7 @@ module Librarian
             end
 
             unpacked_path = version_unpacked_cache_path(version).children.first
-            FileUtils.cp_r(unpacked_path, install_path)
+            cp_r(unpacked_path, install_path)
           end
 
           def environment
@@ -101,7 +103,20 @@ module Librarian
 
             url = "https://api.github.com/repos/#{name}/tarball/#{version}"
             url << "?access_token=#{ENV['GITHUB_API_TOKEN']}" if ENV['GITHUB_API_TOKEN']
-            `curl #{url} -o #{vendored_path(name, version).to_s} -L 2>&1`
+
+            File.open(vendored_path(name, version).to_s, 'wb') do |f|
+              begin
+                debug { "Downloading <#{url}> to <#{f.path}>" }
+                open(url,
+                  "User-Agent" => "librarian-puppet v#{Librarian::Puppet::VERSION}") do |res|
+                  while buffer = res.read(8192)
+                    f.write(buffer)
+                  end
+                end
+              rescue OpenURI::HTTPError => e
+                raise e, "Error requesting <#{url}>: #{e.to_s}"
+              end
+            end
           end
 
           def clean_up_old_cached_versions(name)
@@ -114,33 +129,34 @@ module Librarian
 
           def api_call(path)
             url = "https://api.github.com#{path}"
-            url << "?access_token=#{ENV['GITHUB_API_TOKEN']}" if ENV['GITHUB_API_TOKEN']
+            url << "?access_token=#{ENV[TOKEN_KEY]}" if ENV[TOKEN_KEY]
+            code, data = http_get(url, :headers => {
+              "User-Agent" => "librarian-puppet v#{Librarian::Puppet::VERSION}"
+            })
+
+            if code == 200
+              JSON.parse(data)
+            elsif code == 403
+              begin
+                message = JSON.parse(data)['message']
+                if message && message.include?('API rate limit exceeded')
+                  raise Error, message + " -- increase limit by authenticating via #{TOKEN_KEY}=your-token"
+                end
+              rescue JSON::ParserError
+                # 403 response does not return json, skip.
+              end
+            end
+          end
+
+          def http_get(url, options)
             uri = URI.parse(url)
             http = Net::HTTP.new(uri.host, uri.port)
             http.use_ssl = true
             http.verify_mode = OpenSSL::SSL::VERIFY_NONE
             request = Net::HTTP::Get.new(uri.request_uri)
-
-            request.add_field "User-Agent",
-              "librarian-puppet v#{Librarian::Puppet::VERSION}"
-
+            options[:headers].each { |k, v| request.add_field k, v }
             resp = http.request(request)
-            data = resp.body
-
-            if resp.code.to_i == 403
-              begin
-                message = JSON.parse(data)['message']
-                if message.include? 'API rate limit exceeded'
-                  raise Error, message
-                end
-                rescue JSON::ParserError
-                  # 403 response does not return json, skip.
-              end
-            elsif resp.code.to_i != 200
-              nil
-            else
-              JSON.parse(data)
-            end
+            [resp.code.to_i, resp.body]
           end
         end
 

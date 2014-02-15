@@ -1,12 +1,14 @@
-require 'uri'
-require 'net/http'
 require 'json'
+require 'open-uri'
 
 module Librarian
   module Puppet
     module Source
       class Forge
+        include Librarian::Puppet::Util
+
         class Repo
+          include Librarian::Puppet::Util
 
           attr_accessor :source, :name
           private :source=, :name=
@@ -14,20 +16,27 @@ module Librarian
           def initialize(source, name)
             self.source = source
             self.name = name
+            # API returned data for this module including all versions and dependencies, indexed by module name
+            # from http://forge.puppetlabs.com/api/v1/releases.json?module=#{name}
+            @api_data = nil
+            # API returned data for this module and a specific version, indexed by version
+            # from http://forge.puppetlabs.com/api/v1/releases.json?module=#{name}&version=#{version}
+            @api_version_data = {}
           end
 
           def versions
-            data = api_call("#{name}.json")
-            if data.nil?
-              raise Error, "Unable to find module '#{name}' on #{source}"
+            return @versions if @versions
+            @versions = api_data(name).map { |r| r['version'] }.reverse
+            if @versions.empty?
+              info { "No versions found for module #{name}" }
+            else
+              debug { "  Module #{name} found versions: #{@versions.join(", ")}" }
             end
-
-            data['releases'].map { |r| r['version'] }.sort.reverse
+            @versions
           end
 
           def dependencies(version)
-            data = api_call("api/v1/releases.json?module=#{name}&version=#{version}")
-            data[name].first['dependencies']
+            api_version_data(name, version)['dependencies']
           end
 
           def manifests
@@ -56,7 +65,7 @@ module Librarian
             unless unpacked_path.exist?
               raise Error, "#{unpacked_path} does not exist, something went wrong. Try removing it manually"
             else
-              FileUtils.cp_r(unpacked_path, install_path)
+              cp_r(unpacked_path, install_path)
             end
 
           end
@@ -95,7 +104,8 @@ module Librarian
             target = vendored?(name, version) ? vendored_path(name, version) : name
 
 
-            command = "puppet module install --target-dir '#{path}' --module_repository '#{source}' --modulepath '#{path}' --ignore-dependencies '#{target}'"
+            command = "puppet module install --version #{version} --target-dir '#{path}' --module_repository '#{source}' --modulepath '#{path}' --ignore-dependencies '#{target}'"
+            debug { "Executing puppet module install for #{name} #{version}" }
             output = `#{command}`
 
             # Check for bad exit code
@@ -109,7 +119,7 @@ module Librarian
 
           def check_puppet_module_options
             min_version    = Gem::Version.create('2.7.13')
-            puppet_version = Gem::Version.create(`puppet --version`.split(' ').first.strip.gsub('-', '.'))
+            puppet_version = Gem::Version.create(PUPPET_VERSION.gsub('-', '.'))
 
             if puppet_version < min_version
               raise Error, "To get modules from the forge, we use the puppet faces module command. For this you need at least puppet version 2.7.13 and you have #{puppet_version}"
@@ -125,39 +135,56 @@ module Librarian
           end
 
           def vendor_cache(name, version)
-            File.open(vendored_path(name, version).to_s, 'w') do |f|
-              download(name, version) do |data|
-                f << data
+            info = api_version_data(name, version)
+            url = "#{source}#{info[name].first['file']}"
+            path = vendored_path(name, version).to_s
+            debug { "Downloading #{url} into #{path}"}
+            File.open(path, 'wb') do |f|
+              open(url, "rb") do |input|
+                f.write(input.read)
               end
-            end
-          end
-
-          def download(name, version, &block)
-            data = api_call("api/v1/releases.json?module=#{name}&version=#{version}")
-
-            info = data[name].detect {|h| h['version'] == version.to_s }
-
-            stream(info['file'], &block)
-          end
-
-          def stream(file, &block)
-            Net::HTTP.get_response(URI.parse("#{source}#{file}")) do |res|
-              res.code
-
-              res.read_body(&block)
             end
           end
 
         private
 
-          def api_call(path)
-            base_url = source.to_s
-            resp = Net::HTTP.get_response(URI.parse("#{base_url}/#{path}"))
-            if resp.code.to_i != 200
-              nil
-            else
-              data = resp.body
+          # get and cache the API data for a specific module with all its versions and dependencies
+          def api_data(module_name)
+            return @api_data[module_name] if @api_data
+            # call API and cache data
+            @api_data = api_call(module_name)
+            if @api_data.nil?
+              raise Error, "Unable to find module '#{name}' on #{source}"
+            end
+            @api_data[module_name]
+          end
+
+          # get and cache the API data for a specific module and version
+          def api_version_data(module_name, version)
+            # if we already got all the versions, find in cached data
+            return @api_data[module_name].detect{|x| x['version'] == version.to_s} if @api_data
+            # otherwise call the api for this version if not cached already
+            @api_version_data[version] = api_call(name, version) if @api_version_data[version].nil?
+            @api_version_data[version]
+          end
+
+          def api_call(module_name, version=nil)
+            base_url = source.uri
+            path = "api/v1/releases.json?module=#{module_name}"
+            path = "#{path}&version=#{version}" unless version.nil?
+            url = "#{base_url}/#{path}"
+            debug { "Querying Forge API for module #{name}#{" and version #{version}" unless version.nil?}: #{url}" }
+            
+            begin
+              data = open(url) {|f| f.read}
               JSON.parse(data)
+            rescue OpenURI::HTTPError => e
+              case e.io.status[0].to_i
+              when 404,410
+                nil
+              else
+                raise e, "Error requesting #{base_url}/#{path}: #{e.to_s}"
+              end
             end
           end
         end

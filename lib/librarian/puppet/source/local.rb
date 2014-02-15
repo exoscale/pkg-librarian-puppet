@@ -2,6 +2,7 @@ module Librarian
   module Puppet
     module Source
       module Local
+        include Librarian::Puppet::Util
 
         def install!(manifest)
           manifest.source == self or raise ArgumentError
@@ -10,6 +11,7 @@ module Librarian
 
           name, version = manifest.name, manifest.version
           found_path = found_path(name)
+          raise Error, "Path for #{name} doesn't contain a puppet module" if found_path.nil?
 
           if name.include? '/'
             new_name = name.split('/').last
@@ -40,13 +42,14 @@ module Librarian
 
         def install_perform_step_copy!(found_path, install_path)
           debug { "Copying #{relative_path_to(found_path)} to #{relative_path_to(install_path)}" }
-          FileUtils.cp_r(found_path, install_path)
+          cp_r(found_path, install_path)
         end
 
         def manifest?(name, path)
           return true if path.join('manifests').exist?
           return true if path.join('lib').join('puppet').exist?
           return true if path.join('lib').join('facter').exist?
+          debug { "Could not find manifests, lib/puppet or lib/facter under #{path}, assuming is not a puppet module" }
           false
         end
       end

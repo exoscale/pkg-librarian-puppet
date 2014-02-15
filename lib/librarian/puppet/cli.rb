@@ -45,6 +45,12 @@ module Librarian
       option "destructive", :type => :boolean, :default => false
       option "local", :type => :boolean, :default => false
       def install
+
+        unless File.exist?('Puppetfile')
+          say "Could not find Puppetfile in #{Dir.pwd}", :red
+          exit 1
+        end
+
         ensure!
         clean! if options["clean"]
         unless options["destructive"].nil?
@@ -61,6 +67,7 @@ module Librarian
         environment.config_db.local['mode'] = options['local'] ? 'local' : nil
 
         resolve!
+        debug { "Install: dependencies resolved"}
         install!
       end
 

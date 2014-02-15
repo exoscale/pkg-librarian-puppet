@@ -1,5 +1,15 @@
 require 'librarian/source/git'
 require 'librarian/puppet/source/local'
+begin
+  require 'puppet'
+rescue LoadError
+  $stderr.puts <<-EOF
+Unable to load puppet, the puppet gem is required for :git source.
+Install it with: gem install puppet
+EOF
+  exit 1
+end
+
 
 module Librarian
   module Source
@@ -14,38 +24,6 @@ module Librarian
           command = %W(rev-parse #{reference}^{commit} --quiet)
           run!(command, :chdir => true).strip
         end
-
-        # Naming this method 'version' causes an exception to be raised.
-        def module_version
-          return '0.0.1' unless modulefile?
-
-          metadata  = ::Puppet::ModuleTool::Metadata.new
-          ::Puppet::ModuleTool::ModulefileReader.evaluate(metadata, modulefile)
-
-          metadata.version
-        end
-
-        def dependencies
-          return {} unless modulefile?
-
-          metadata = ::Puppet::ModuleTool::Metadata.new
-
-          ::Puppet::ModuleTool::ModulefileReader.evaluate(metadata, modulefile)
-
-          metadata.dependencies.inject({}) do |h, dependency|
-            name = dependency.instance_variable_get(:@full_module_name)
-            version = dependency.instance_variable_get(:@version_requirement)
-            h.update(name => version)
-          end
-        end
-
-        def modulefile
-          File.join(path, 'Modulefile')
-        end
-
-        def modulefile?
-          File.exists?(modulefile)
-        end
       end
     end
   end
@@ -54,6 +32,7 @@ module Librarian
     module Source
       class Git < Librarian::Source::Git
         include Local
+        include Librarian::Puppet::Util
 
         def cache!
           return vendor_checkout! if vendor_cached?
@@ -95,18 +74,63 @@ module Librarian
         def fetch_version(name, extra)
           cache!
           found_path = found_path(name)
-          repository.module_version
+          module_version
         end
 
         def fetch_dependencies(name, version, extra)
-          repository.dependencies.map do |k, v|
-            v = Requirement.new(v).gem_requirement
-            Dependency.new(k, v, forge_source)
+          dependencies = Set.new
+
+          if modulefile?
+            metadata = ::Puppet::ModuleTool::Metadata.new
+
+            ::Puppet::ModuleTool::ModulefileReader.evaluate(metadata, modulefile)
+
+            metadata.dependencies.each do |dependency|
+              dependency_name = dependency.instance_variable_get(:@full_module_name)
+              version = dependency.instance_variable_get(:@version_requirement)
+              gem_requirement = Requirement.new(version).gem_requirement
+              dependencies << Dependency.new(dependency_name, gem_requirement, forge_source)
+            end
           end
+
+          if specfile?
+            spec = environment.dsl(Pathname(specfile))
+            dependencies.merge spec.dependencies
+          end
+
+          dependencies
         end
 
         def forge_source
           Forge.from_lock_options(environment, :remote=>"http://forge.puppetlabs.com")
+        end
+
+        private
+
+        # Naming this method 'version' causes an exception to be raised.
+        def module_version
+          return '0.0.1' unless modulefile?
+
+          metadata  = ::Puppet::ModuleTool::Metadata.new
+          ::Puppet::ModuleTool::ModulefileReader.evaluate(metadata, modulefile)
+
+          metadata.version
+        end
+
+        def modulefile
+          File.join(filesystem_path, 'Modulefile')
+        end
+
+        def modulefile?
+          File.exists?(modulefile)
+        end
+
+        def specfile
+          File.join(filesystem_path, environment.specfile_name)
+        end
+
+        def specfile?
+          File.exists?(specfile)
         end
 
       end

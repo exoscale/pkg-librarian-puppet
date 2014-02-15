@@ -11,6 +11,11 @@ module Librarian
         "puppet"
       end
 
+      def tmp_path
+        part = config_db["tmp"] || ".tmp"
+        project_path.join(part)
+      end
+
       def install_path
         part = config_db["path"] || "modules"
         project_path.join(part)
@@ -26,14 +31,6 @@ module Librarian
 
       def vendor_source
         vendor_path.join('source')
-      end
-
-      def cache_path
-        project_path.join(".tmp/librarian/cache")
-      end
-
-      def scratch_path
-        project_path.join(".tmp/librarian/scratch")
       end
 
       def vendor!

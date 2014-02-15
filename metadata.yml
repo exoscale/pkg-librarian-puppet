@@ -1,36 +1,32 @@
 --- !ruby/object:Gem::Specification
 name: librarian-puppet
 version: !ruby/object:Gem::Version
-  version: 0.9.10
-  prerelease: 
+  version: 0.9.13
 platform: ruby
 authors:
 - Tim Sharpe
 autorequire: 
 bindir: bin
 cert_chain: []
-date: 2013-08-21 00:00:00.000000000 Z
+date: 2014-02-11 00:00:00.000000000 Z
 dependencies:
 - !ruby/object:Gem::Dependency
-  name: thor
+  name: librarian
   requirement: !ruby/object:Gem::Requirement
-    none: false
     requirements:
-    - - ~>
+    - - ! '>='
       - !ruby/object:Gem::Version
-        version: '0.15'
+        version: 0.1.2
   type: :runtime
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
-    none: false
     requirements:
-    - - ~>
+    - - ! '>='
       - !ruby/object:Gem::Version
-        version: '0.15'
+        version: 0.1.2
 - !ruby/object:Gem::Dependency
   name: json
   requirement: !ruby/object:Gem::Requirement
-    none: false
     requirements:
     - - ! '>='
       - !ruby/object:Gem::Version
@@ -38,7 +34,20 @@ dependencies:
   type: :runtime
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
-    none: false
+    requirements:
+    - - ! '>='
+      - !ruby/object:Gem::Version
+        version: '0'
+- !ruby/object:Gem::Dependency
+  name: open3_backport
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - ! '>='
+      - !ruby/object:Gem::Version
+        version: '0'
+  type: :runtime
+  prerelease: false
+  version_requirements: !ruby/object:Gem::Requirement
     requirements:
     - - ! '>='
       - !ruby/object:Gem::Version
@@ -46,7 +55,6 @@ dependencies:
 - !ruby/object:Gem::Dependency
   name: rake
   requirement: !ruby/object:Gem::Requirement
-    none: false
     requirements:
     - - ! '>='
       - !ruby/object:Gem::Version
@@ -54,7 +62,20 @@ dependencies:
   type: :development
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
-    none: false
+    requirements:
+    - - ! '>='
+      - !ruby/object:Gem::Version
+        version: '0'
+- !ruby/object:Gem::Dependency
+  name: rspec
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - ! '>='
+      - !ruby/object:Gem::Version
+        version: '0'
+  type: :development
+  prerelease: false
+  version_requirements: !ruby/object:Gem::Requirement
     requirements:
     - - ! '>='
       - !ruby/object:Gem::Version
@@ -62,7 +83,6 @@ dependencies:
 - !ruby/object:Gem::Dependency
   name: cucumber
   requirement: !ruby/object:Gem::Requirement
-    none: false
     requirements:
     - - ! '>='
       - !ruby/object:Gem::Version
@@ -70,7 +90,6 @@ dependencies:
   type: :development
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
-    none: false
     requirements:
     - - ! '>='
       - !ruby/object:Gem::Version
@@ -78,7 +97,6 @@ dependencies:
 - !ruby/object:Gem::Dependency
   name: aruba
   requirement: !ruby/object:Gem::Requirement
-    none: false
     requirements:
     - - ! '>='
       - !ruby/object:Gem::Version
@@ -86,7 +104,6 @@ dependencies:
   type: :development
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
-    none: false
     requirements:
     - - ! '>='
       - !ruby/object:Gem::Version
@@ -94,7 +111,6 @@ dependencies:
 - !ruby/object:Gem::Dependency
   name: puppet
   requirement: !ruby/object:Gem::Requirement
-    none: false
     requirements:
     - - ! '>='
       - !ruby/object:Gem::Version
@@ -102,7 +118,34 @@ dependencies:
   type: :development
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
-    none: false
+    requirements:
+    - - ! '>='
+      - !ruby/object:Gem::Version
+        version: '0'
+- !ruby/object:Gem::Dependency
+  name: minitest
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - ~>
+      - !ruby/object:Gem::Version
+        version: '5'
+  type: :development
+  prerelease: false
+  version_requirements: !ruby/object:Gem::Requirement
+    requirements:
+    - - ~>
+      - !ruby/object:Gem::Version
+        version: '5'
+- !ruby/object:Gem::Dependency
+  name: mocha
+  requirement: !ruby/object:Gem::Requirement
+    requirements:
+    - - ! '>='
+      - !ruby/object:Gem::Version
+        version: '0'
+  type: :development
+  prerelease: false
+  version_requirements: !ruby/object:Gem::Requirement
     requirements:
     - - ! '>='
       - !ruby/object:Gem::Version
@@ -133,127 +176,31 @@ files:
 - lib/librarian/puppet/source/path.rb
 - lib/librarian/puppet/source.rb
 - lib/librarian/puppet/templates/Puppetfile
+- lib/librarian/puppet/util.rb
 - lib/librarian/puppet/version.rb
 - lib/librarian/puppet.rb
-- vendor/librarian/bin/librarian-chef
-- vendor/librarian/bin/librarian-mock
-- vendor/librarian/CHANGELOG.md
-- vendor/librarian/config/cucumber.yaml
-- vendor/librarian/features/chef/cli/init.feature
-- vendor/librarian/features/chef/cli/install.feature
-- vendor/librarian/features/chef/cli/show.feature
-- vendor/librarian/features/chef/cli/version.feature
-- vendor/librarian/features/support/env.rb
-- vendor/librarian/Gemfile
-- vendor/librarian/lib/librarian/action/base.rb
-- vendor/librarian/lib/librarian/action/clean.rb
-- vendor/librarian/lib/librarian/action/ensure.rb
-- vendor/librarian/lib/librarian/action/install.rb
-- vendor/librarian/lib/librarian/action/resolve.rb
-- vendor/librarian/lib/librarian/action/update.rb
-- vendor/librarian/lib/librarian/action.rb
-- vendor/librarian/lib/librarian/chef/cli.rb
-- vendor/librarian/lib/librarian/chef/dsl.rb
-- vendor/librarian/lib/librarian/chef/environment.rb
-- vendor/librarian/lib/librarian/chef/extension.rb
-- vendor/librarian/lib/librarian/chef/integration/knife.rb
-- vendor/librarian/lib/librarian/chef/manifest_reader.rb
-- vendor/librarian/lib/librarian/chef/source/git.rb
-- vendor/librarian/lib/librarian/chef/source/local.rb
-- vendor/librarian/lib/librarian/chef/source/path.rb
-- vendor/librarian/lib/librarian/chef/source/site.rb
-- vendor/librarian/lib/librarian/chef/source.rb
-- vendor/librarian/lib/librarian/chef/templates/Cheffile
-- vendor/librarian/lib/librarian/chef.rb
-- vendor/librarian/lib/librarian/cli/manifest_presenter.rb
-- vendor/librarian/lib/librarian/cli.rb
-- vendor/librarian/lib/librarian/config/database.rb
-- vendor/librarian/lib/librarian/config/file_source.rb
-- vendor/librarian/lib/librarian/config/hash_source.rb
-- vendor/librarian/lib/librarian/config/source.rb
-- vendor/librarian/lib/librarian/config.rb
-- vendor/librarian/lib/librarian/dependency.rb
-- vendor/librarian/lib/librarian/dsl/receiver.rb
-- vendor/librarian/lib/librarian/dsl/target.rb
-- vendor/librarian/lib/librarian/dsl.rb
-- vendor/librarian/lib/librarian/environment.rb
-- vendor/librarian/lib/librarian/error.rb
-- vendor/librarian/lib/librarian/helpers.rb
-- vendor/librarian/lib/librarian/lockfile/compiler.rb
-- vendor/librarian/lib/librarian/lockfile/parser.rb
-- vendor/librarian/lib/librarian/lockfile.rb
-- vendor/librarian/lib/librarian/logger.rb
-- vendor/librarian/lib/librarian/manifest.rb
-- vendor/librarian/lib/librarian/manifest_set.rb
-- vendor/librarian/lib/librarian/mock/cli.rb
-- vendor/librarian/lib/librarian/mock/dsl.rb
-- vendor/librarian/lib/librarian/mock/environment.rb
-- vendor/librarian/lib/librarian/mock/extension.rb
-- vendor/librarian/lib/librarian/mock/source/mock/registry.rb
-- vendor/librarian/lib/librarian/mock/source/mock.rb
-- vendor/librarian/lib/librarian/mock/source.rb
-- vendor/librarian/lib/librarian/mock.rb
-- vendor/librarian/lib/librarian/resolution.rb
-- vendor/librarian/lib/librarian/resolver/implementation.rb
-- vendor/librarian/lib/librarian/resolver.rb
-- vendor/librarian/lib/librarian/source/git/repository.rb
-- vendor/librarian/lib/librarian/source/git.rb
-- vendor/librarian/lib/librarian/source/local.rb
-- vendor/librarian/lib/librarian/source/path.rb
-- vendor/librarian/lib/librarian/source.rb
-- vendor/librarian/lib/librarian/spec.rb
-- vendor/librarian/lib/librarian/spec_change_set.rb
-- vendor/librarian/lib/librarian/specfile.rb
-- vendor/librarian/lib/librarian/support/abstract_method.rb
-- vendor/librarian/lib/librarian/ui.rb
-- vendor/librarian/lib/librarian/version.rb
-- vendor/librarian/lib/librarian.rb
-- vendor/librarian/librarian.gemspec
-- vendor/librarian/MIT-LICENSE
-- vendor/librarian/Rakefile
-- vendor/librarian/README.md
-- vendor/librarian/spec/functional/chef/source/git_spec.rb
-- vendor/librarian/spec/functional/chef/source/site_spec.rb
-- vendor/librarian/spec/functional/source/git/repository_spec.rb
-- vendor/librarian/spec/unit/action/base_spec.rb
-- vendor/librarian/spec/unit/action/clean_spec.rb
-- vendor/librarian/spec/unit/action/ensure_spec.rb
-- vendor/librarian/spec/unit/action/install_spec.rb
-- vendor/librarian/spec/unit/config/database_spec.rb
-- vendor/librarian/spec/unit/dependency_spec.rb
-- vendor/librarian/spec/unit/dsl_spec.rb
-- vendor/librarian/spec/unit/environment_spec.rb
-- vendor/librarian/spec/unit/lockfile/parser_spec.rb
-- vendor/librarian/spec/unit/lockfile_spec.rb
-- vendor/librarian/spec/unit/manifest_set_spec.rb
-- vendor/librarian/spec/unit/manifest_spec.rb
-- vendor/librarian/spec/unit/manifest_version_spec.rb
-- vendor/librarian/spec/unit/mock/source/mock_spec.rb
-- vendor/librarian/spec/unit/resolver_spec.rb
-- vendor/librarian/spec/unit/source/git_spec.rb
-- vendor/librarian/spec/unit/spec_change_set_spec.rb
 homepage: https://github.com/rodjek/librarian-puppet
-licenses: []
+licenses:
+- MIT
+metadata: {}
 post_install_message: 
 rdoc_options: []
 require_paths:
 - lib
 required_ruby_version: !ruby/object:Gem::Requirement
-  none: false
   requirements:
   - - ! '>='
     - !ruby/object:Gem::Version
       version: '0'
 required_rubygems_version: !ruby/object:Gem::Requirement
-  none: false
   requirements:
   - - ! '>='
     - !ruby/object:Gem::Version
       version: '0'
 requirements: []
 rubyforge_project: 
-rubygems_version: 1.8.23
+rubygems_version: 2.1.11
 signing_key: 
-specification_version: 3
+specification_version: 4
 summary: Bundler for your Puppet modules
 test_files: []
