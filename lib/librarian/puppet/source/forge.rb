@@ -1,5 +1,6 @@
 require 'json'
 require 'open-uri'
+require 'librarian/puppet/util'
 
 module Librarian
   module Puppet
@@ -101,27 +102,43 @@ module Librarian
 
             path.mkpath
 
-            target = vendored?(name, version) ? vendored_path(name, version) : name
+            target = vendored?(name, version) ? vendored_path(name, version).to_s : name
 
+            # TODO can't pass the default forge url (http://forge.puppetlabs.com) to clients that use the v3 API (https://forgeapi.puppetlabs.com)
+            module_repository = source.to_s
+            if Forge.client_api_version() > 1 and source =~ %r{^http(s)?://forge\.puppetlabs\.com}
+              module_repository = "https://forgeapi.puppetlabs.com"
+              warn("Your Puppet client uses the Forge API v3, you should use this Forge URL: #{module_repository}")
+            end
 
-            command = "puppet module install --version #{version} --target-dir '#{path}' --module_repository '#{source}' --modulepath '#{path}' --ignore-dependencies '#{target}'"
+            command = %W{puppet module install --version #{version} --target-dir}
+            command.push(*[path.to_s, "--module_repository", module_repository, "--modulepath", path.to_s, "--module_working_dir", path.to_s, "--ignore-dependencies", target])
             debug { "Executing puppet module install for #{name} #{version}" }
-            output = `#{command}`
 
-            # Check for bad exit code
-            unless $? == 0
+            begin
+              Librarian::Posix.run!(command)
+            rescue Posix::CommandFailure => e
               # Rollback the directory if the puppet module had an error
-              path.unlink
-              raise Error, "Error executing puppet module install:\n#{command}\nError:\n#{output}"
+              begin
+                path.unlink
+              rescue => u
+                warn("Unable to rollback path #{path}: #{u}")
+              end
+              tar = Dir[File.join(path.to_s, "**/*.tar.gz")]
+              msg = ""
+              if e.message =~ /Unexpected EOF in archive/ and !tar.empty?
+                file = tar.first
+                msg = " (looks like an incomplete download of #{file})"
+              end
+              raise Error, "Error executing puppet module install#{msg}:\n#{command.join(" ")}\nError:\n#{e.message}"
             end
 
           end
 
           def check_puppet_module_options
             min_version    = Gem::Version.create('2.7.13')
-            puppet_version = Gem::Version.create(PUPPET_VERSION.gsub('-', '.'))
 
-            if puppet_version < min_version
+            if Librarian::Puppet.puppet_gem_version < min_version
               raise Error, "To get modules from the forge, we use the puppet faces module command. For this you need at least puppet version 2.7.13 and you have #{puppet_version}"
             end
           end
@@ -174,7 +191,7 @@ module Librarian
             path = "#{path}&version=#{version}" unless version.nil?
             url = "#{base_url}/#{path}"
             debug { "Querying Forge API for module #{name}#{" and version #{version}" unless version.nil?}: #{url}" }
-            
+
             begin
               data = open(url) {|f| f.read}
               JSON.parse(data)
@@ -209,6 +226,18 @@ module Librarian
 
             new(environment, uri, options)
           end
+
+          def client_api_version()
+            version = 1
+            pe_version = Librarian::Puppet.puppet_version.match(/\(Puppet Enterprise (.+)\)/)
+
+            # Puppet enterprise 3.2.0+ uses api v3
+            if pe_version and Gem::Version.create(pe_version[1].strip) >= Gem::Version.create('3.2.0')
+              version = 3
+            end
+            return version
+          end
+
         end
 
         attr_accessor :environment

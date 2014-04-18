@@ -1,15 +1,5 @@
 require 'librarian/source/git'
 require 'librarian/puppet/source/local'
-begin
-  require 'puppet'
-rescue LoadError
-  $stderr.puts <<-EOF
-Unable to load puppet, the puppet gem is required for :git source.
-Install it with: gem install puppet
-EOF
-  exit 1
-end
-
 
 module Librarian
   module Source
@@ -58,79 +48,13 @@ module Librarian
           repository.path.rmtree if repository.path.exist?
           repository.path.mkpath
 
-          Dir.chdir(repository.path.to_s) do
-            %x{tar xzf #{vendor_tgz}}
-          end
+          run!(%W{tar xzf #{vendor_tgz}}, :chdir => repository.path.to_s)
 
           repository_cached!
         end
 
         def cache_in_vendor(tmp_path)
-          Dir.chdir(tmp_path.to_s) do
-            %x{git archive #{sha} | gzip > #{vendor_tgz}}
-          end
-        end
-
-        def fetch_version(name, extra)
-          cache!
-          found_path = found_path(name)
-          module_version
-        end
-
-        def fetch_dependencies(name, version, extra)
-          dependencies = Set.new
-
-          if modulefile?
-            metadata = ::Puppet::ModuleTool::Metadata.new
-
-            ::Puppet::ModuleTool::ModulefileReader.evaluate(metadata, modulefile)
-
-            metadata.dependencies.each do |dependency|
-              dependency_name = dependency.instance_variable_get(:@full_module_name)
-              version = dependency.instance_variable_get(:@version_requirement)
-              gem_requirement = Requirement.new(version).gem_requirement
-              dependencies << Dependency.new(dependency_name, gem_requirement, forge_source)
-            end
-          end
-
-          if specfile?
-            spec = environment.dsl(Pathname(specfile))
-            dependencies.merge spec.dependencies
-          end
-
-          dependencies
-        end
-
-        def forge_source
-          Forge.from_lock_options(environment, :remote=>"http://forge.puppetlabs.com")
-        end
-
-        private
-
-        # Naming this method 'version' causes an exception to be raised.
-        def module_version
-          return '0.0.1' unless modulefile?
-
-          metadata  = ::Puppet::ModuleTool::Metadata.new
-          ::Puppet::ModuleTool::ModulefileReader.evaluate(metadata, modulefile)
-
-          metadata.version
-        end
-
-        def modulefile
-          File.join(filesystem_path, 'Modulefile')
-        end
-
-        def modulefile?
-          File.exists?(modulefile)
-        end
-
-        def specfile
-          File.join(filesystem_path, environment.specfile_name)
-        end
-
-        def specfile?
-          File.exists?(specfile)
+          run!(%W{git archive #{sha} | gzip > #{vendor_tgz}}, :chdir => tmp_path.to_s)
         end
 
       end

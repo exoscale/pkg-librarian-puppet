@@ -25,6 +25,7 @@ module Librarian
           end
 
           def versions
+            return @versions if @versions
             data = api_call("/repos/#{source.uri}/tags")
             if data.nil?
               raise Error, "Unable to find module '#{source.uri}' on https://github.com"
@@ -36,7 +37,9 @@ module Librarian
               version !~ /\A\d\.\d(\.\d.*)?\z/
             end
 
-            all_versions.compact
+            @versions = all_versions.compact
+            debug { "  Module #{name} found versions: #{@versions.join(", ")}" }
+            @versions
           end
 
           def manifests
@@ -86,7 +89,7 @@ module Librarian
 
             target = vendored?(source.uri, version) ? vendored_path(source.uri, version) : name
 
-            `tar xzf #{target} -C #{path}`
+            Librarian::Posix.run!(%W{tar xzf #{target} -C #{path}})
           end
 
           def vendored?(name, version)

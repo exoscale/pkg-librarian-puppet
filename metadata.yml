@@ -1,125 +1,111 @@
 --- !ruby/object:Gem::Specification
 name: librarian-puppet
 version: !ruby/object:Gem::Version
-  version: 0.9.13
+  version: 1.0.1
 platform: ruby
 authors:
 - Tim Sharpe
 autorequire: 
 bindir: bin
 cert_chain: []
-date: 2014-02-11 00:00:00.000000000 Z
+date: 2014-04-12 00:00:00.000000000 Z
 dependencies:
 - !ruby/object:Gem::Dependency
   name: librarian
   requirement: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: 0.1.2
   type: :runtime
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: 0.1.2
 - !ruby/object:Gem::Dependency
   name: json
   requirement: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
   type: :runtime
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
-      - !ruby/object:Gem::Version
-        version: '0'
-- !ruby/object:Gem::Dependency
-  name: open3_backport
-  requirement: !ruby/object:Gem::Requirement
-    requirements:
-    - - ! '>='
-      - !ruby/object:Gem::Version
-        version: '0'
-  type: :runtime
-  prerelease: false
-  version_requirements: !ruby/object:Gem::Requirement
-    requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
 - !ruby/object:Gem::Dependency
   name: rake
   requirement: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
   type: :development
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
 - !ruby/object:Gem::Dependency
   name: rspec
   requirement: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
   type: :development
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
 - !ruby/object:Gem::Dependency
   name: cucumber
   requirement: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
   type: :development
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
 - !ruby/object:Gem::Dependency
   name: aruba
   requirement: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
   type: :development
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
 - !ruby/object:Gem::Dependency
   name: puppet
   requirement: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
   type: :development
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
 - !ruby/object:Gem::Dependency
@@ -140,18 +126,20 @@ dependencies:
   name: mocha
   requirement: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
   type: :development
   prerelease: false
   version_requirements: !ruby/object:Gem::Requirement
     requirements:
-    - - ! '>='
+    - - '>='
       - !ruby/object:Gem::Version
         version: '0'
-description: ! "Simplify deployment of your Puppet infrastructure by\n  automatically
-  pulling in modules from the forge and git repositories with\n  a single command."
+description: |-
+  Simplify deployment of your Puppet infrastructure by
+    automatically pulling in modules from the forge and git repositories with
+    a single command.
 email:
 - tim@sharpe.id.au
 executables:
@@ -163,22 +151,22 @@ files:
 - LICENSE
 - README.md
 - bin/librarian-puppet
+- lib/librarian/puppet.rb
 - lib/librarian/puppet/cli.rb
 - lib/librarian/puppet/dsl.rb
 - lib/librarian/puppet/environment.rb
 - lib/librarian/puppet/extension.rb
 - lib/librarian/puppet/lockfile/parser.rb
 - lib/librarian/puppet/requirement.rb
+- lib/librarian/puppet/source.rb
 - lib/librarian/puppet/source/forge.rb
 - lib/librarian/puppet/source/git.rb
 - lib/librarian/puppet/source/githubtarball.rb
 - lib/librarian/puppet/source/local.rb
 - lib/librarian/puppet/source/path.rb
-- lib/librarian/puppet/source.rb
 - lib/librarian/puppet/templates/Puppetfile
 - lib/librarian/puppet/util.rb
 - lib/librarian/puppet/version.rb
-- lib/librarian/puppet.rb
 homepage: https://github.com/rodjek/librarian-puppet
 licenses:
 - MIT
@@ -189,17 +177,17 @@ require_paths:
 - lib
 required_ruby_version: !ruby/object:Gem::Requirement
   requirements:
-  - - ! '>='
+  - - '>='
     - !ruby/object:Gem::Version
       version: '0'
 required_rubygems_version: !ruby/object:Gem::Requirement
   requirements:
-  - - ! '>='
+  - - '>='
     - !ruby/object:Gem::Version
       version: '0'
 requirements: []
 rubyforge_project: 
-rubygems_version: 2.1.11
+rubygems_version: 2.2.2
 signing_key: 
 specification_version: 4
 summary: Bundler for your Puppet modules
