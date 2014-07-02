@@ -28,16 +28,26 @@ module Librarian
           return vendor_checkout! if vendor_cached?
 
           if environment.local?
-            raise Error, "Could not find a local copy of #{uri} at #{sha}."
+            raise Error, "Could not find a local copy of #{uri}#{" at #{sha}" unless sha.nil?}."
           end
 
-          super
+          begin
+            super
+          rescue Librarian::Posix::CommandFailure => e
+            raise Error, "Could not checkout #{uri}#{" at #{sha}" unless sha.nil?}: #{e}"
+          end
 
           cache_in_vendor(repository.path) if environment.vendor?
         end
 
+        private
+
+        def vendor_tar
+          environment.vendor_source.join("#{sha}.tar")
+        end
+
         def vendor_tgz
-          environment.vendor_source + "#{sha}.tar.gz"
+          environment.vendor_source.join("#{sha}.tar.gz")
         end
 
         def vendor_cached?
@@ -48,13 +58,14 @@ module Librarian
           repository.path.rmtree if repository.path.exist?
           repository.path.mkpath
 
-          run!(%W{tar xzf #{vendor_tgz}}, :chdir => repository.path.to_s)
+          Librarian::Posix.run!(%W{tar xzf #{vendor_tgz}}, :chdir => repository.path.to_s)
 
           repository_cached!
         end
 
         def cache_in_vendor(tmp_path)
-          run!(%W{git archive #{sha} | gzip > #{vendor_tgz}}, :chdir => tmp_path.to_s)
+          Librarian::Posix.run!(%W{git archive -o #{vendor_tar} #{sha}}, :chdir => tmp_path.to_s)
+          Librarian::Posix.run!(%W{gzip #{vendor_tar}}, :chdir => tmp_path.to_s)
         end
 
       end

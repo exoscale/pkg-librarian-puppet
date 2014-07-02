@@ -1,14 +1,14 @@
 --- !ruby/object:Gem::Specification
 name: librarian-puppet
 version: !ruby/object:Gem::Version
-  version: 1.0.1
+  version: 1.0.3
 platform: ruby
 authors:
 - Tim Sharpe
 autorequire: 
 bindir: bin
 cert_chain: []
-date: 2014-04-12 00:00:00.000000000 Z
+date: 2014-06-07 00:00:00.000000000 Z
 dependencies:
 - !ruby/object:Gem::Dependency
   name: librarian
@@ -160,10 +160,13 @@ files:
 - lib/librarian/puppet/requirement.rb
 - lib/librarian/puppet/source.rb
 - lib/librarian/puppet/source/forge.rb
+- lib/librarian/puppet/source/forge/repo.rb
 - lib/librarian/puppet/source/git.rb
 - lib/librarian/puppet/source/githubtarball.rb
+- lib/librarian/puppet/source/githubtarball/repo.rb
 - lib/librarian/puppet/source/local.rb
 - lib/librarian/puppet/source/path.rb
+- lib/librarian/puppet/source/repo.rb
 - lib/librarian/puppet/templates/Puppetfile
 - lib/librarian/puppet/util.rb
 - lib/librarian/puppet/version.rb

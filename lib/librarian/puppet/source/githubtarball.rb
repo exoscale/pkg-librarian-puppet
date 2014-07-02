@@ -1,167 +1,12 @@
 require 'uri'
-require 'net/https'
-require 'open-uri'
-require 'json'
-
-require 'librarian/puppet/version'
+require 'librarian/puppet/util'
+require 'librarian/puppet/source/githubtarball/repo'
 
 module Librarian
   module Puppet
     module Source
       class GitHubTarball
         include Librarian::Puppet::Util
-
-        class Repo
-          include Librarian::Puppet::Util
-
-          TOKEN_KEY = 'GITHUB_API_TOKEN'
-
-          attr_accessor :source, :name
-          private :source=, :name=
-
-          def initialize(source, name)
-            self.source = source
-            self.name = name
-          end
-
-          def versions
-            return @versions if @versions
-            data = api_call("/repos/#{source.uri}/tags")
-            if data.nil?
-              raise Error, "Unable to find module '#{source.uri}' on https://github.com"
-            end
-
-            all_versions = data.map { |r| r['name'].gsub(/^v/, '') }.sort.reverse
-
-            all_versions.delete_if do |version|
-              version !~ /\A\d\.\d(\.\d.*)?\z/
-            end
-
-            @versions = all_versions.compact
-            debug { "  Module #{name} found versions: #{@versions.join(", ")}" }
-            @versions
-          end
-
-          def manifests
-            versions.map do |version|
-              Manifest.new(source, name, version)
-            end
-          end
-
-          def install_version!(version, install_path)
-            if environment.local? && !vendored?(source.uri, version)
-              raise Error, "Could not find a local copy of #{source.uri} at #{version}."
-            end
-
-            vendor_cache(source.uri, version) unless vendored?(source.uri, version)
-
-            cache_version_unpacked! version
-
-            if install_path.exist?
-              install_path.rmtree
-            end
-
-            unpacked_path = version_unpacked_cache_path(version).children.first
-            cp_r(unpacked_path, install_path)
-          end
-
-          def environment
-            source.environment
-          end
-
-          def cache_path
-            @cache_path ||= source.cache_path.join(name)
-          end
-
-          def version_unpacked_cache_path(version)
-            cache_path.join('version').join(hexdigest(version.to_s))
-          end
-
-          def hexdigest(value)
-            Digest::MD5.hexdigest(value)
-          end
-
-          def cache_version_unpacked!(version)
-            path = version_unpacked_cache_path(version)
-            return if path.directory?
-
-            path.mkpath
-
-            target = vendored?(source.uri, version) ? vendored_path(source.uri, version) : name
-
-            Librarian::Posix.run!(%W{tar xzf #{target} -C #{path}})
-          end
-
-          def vendored?(name, version)
-            vendored_path(name, version).exist?
-          end
-
-          def vendored_path(name, version)
-            environment.vendor_cache.mkpath
-            environment.vendor_cache.join("#{name.sub("/", "-")}-#{version}.tar.gz")
-          end
-
-          def vendor_cache(name, version)
-            clean_up_old_cached_versions(name)
-
-            url = "https://api.github.com/repos/#{name}/tarball/#{version}"
-            url << "?access_token=#{ENV['GITHUB_API_TOKEN']}" if ENV['GITHUB_API_TOKEN']
-
-            File.open(vendored_path(name, version).to_s, 'wb') do |f|
-              begin
-                debug { "Downloading <#{url}> to <#{f.path}>" }
-                open(url,
-                  "User-Agent" => "librarian-puppet v#{Librarian::Puppet::VERSION}") do |res|
-                  while buffer = res.read(8192)
-                    f.write(buffer)
-                  end
-                end
-              rescue OpenURI::HTTPError => e
-                raise e, "Error requesting <#{url}>: #{e.to_s}"
-              end
-            end
-          end
-
-          def clean_up_old_cached_versions(name)
-            Dir["#{environment.vendor_cache}/#{name.sub('/', '-')}*.tar.gz"].each do |old_version|
-              FileUtils.rm old_version
-            end
-          end
-
-        private
-
-          def api_call(path)
-            url = "https://api.github.com#{path}"
-            url << "?access_token=#{ENV[TOKEN_KEY]}" if ENV[TOKEN_KEY]
-            code, data = http_get(url, :headers => {
-              "User-Agent" => "librarian-puppet v#{Librarian::Puppet::VERSION}"
-            })
-
-            if code == 200
-              JSON.parse(data)
-            elsif code == 403
-              begin
-                message = JSON.parse(data)['message']
-                if message && message.include?('API rate limit exceeded')
-                  raise Error, message + " -- increase limit by authenticating via #{TOKEN_KEY}=your-token"
-                end
-              rescue JSON::ParserError
-                # 403 response does not return json, skip.
-              end
-            end
-          end
-
-          def http_get(url, options)
-            uri = URI.parse(url)
-            http = Net::HTTP.new(uri.host, uri.port)
-            http.use_ssl = true
-            http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-            request = Net::HTTP::Get.new(uri.request_uri)
-            options[:headers].each { |k, v| request.add_field k, v }
-            resp = http.request(request)
-            [resp.code.to_i, resp.body]
-          end
-        end
 
         class << self
           LOCK_NAME = 'GITHUBTARBALL'
@@ -191,12 +36,12 @@ module Librarian
 
         def initialize(environment, uri, options = {})
           self.environment = environment
-          @uri = uri
+          @uri = URI::parse(uri)
           @cache_path = nil
         end
 
         def to_s
-          uri
+          clean_uri(uri).to_s
         end
 
         def ==(other)
@@ -212,11 +57,11 @@ module Librarian
         end
 
         def to_spec_args
-          [uri, {}]
+          [clean_uri(uri).to_s, {}]
         end
 
         def to_lock_options
-          {:remote => uri}
+          {:remote => clean_uri(uri).to_s}
         end
 
         def pinned?
@@ -228,6 +73,8 @@ module Librarian
 
         def install!(manifest)
           manifest.source == self or raise ArgumentError
+
+          debug { "Installing #{manifest}" }
 
           name = manifest.name
           version = manifest.version
@@ -246,8 +93,7 @@ module Librarian
 
         def cache_path
           @cache_path ||= begin
-            dir = Digest::MD5.hexdigest(uri)
-            environment.cache_path.join("source/puppet/githubtarball/#{dir}")
+            environment.cache_path.join("source/puppet/githubtarball/#{uri.host}#{uri.path}")
           end
         end
 

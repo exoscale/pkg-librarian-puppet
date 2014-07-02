@@ -1,3 +1,9 @@
+librarian-puppet (1.0.3-1) unstable; urgency=medium
+
+  * Import upstream release 1.0.3 (Closes: #752309)
+
+ -- Stig Sandbeck Mathisen <ssm@debian.org>  Wed, 02 Jul 2014 21:39:47 +0200
+
 librarian-puppet (1.0.1-1) unstable; urgency=medium
 
   * Imported upstream release 1.0.1
