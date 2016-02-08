@@ -13,3 +13,12 @@
 
 %:
 	dh $@ --buildsystem=ruby --with ruby
+
+override_dh_auto_install:
+	dh_auto_install $@
+	mv -v debian/librarian-puppet/usr/bin debian/librarian-puppet/usr/share/librarian-puppet/
+
+override_dh_compress:
+	dh_compress -O--buildsystem=ruby
+	mv -v debian/librarian-puppet/usr/share/man debian/librarian-puppet/usr/share/librarian-puppet/
+
