@@ -2,14 +2,13 @@ Source: librarian-puppet
 Section: ruby
 Priority: optional
 Maintainer: Debian Ruby Extras Maintainers <pkg-ruby-extras-maintainers@lists.alioth.debian.org>
-Uploaders: Stig Sandbeck Mathisen <ssm@debian.org>
-Build-Depends:
- cucumber,
- debhelper (>= 7.0.50~),
- gem2deb (>= 0.3.0~),
- rake,
-Standards-Version: 3.9.6
-Vcs-Git: git://anonscm.debian.org/pkg-ruby-extras/librarian-puppet.git
+Uploaders: Stig Sandbeck Mathisen <ssm@debian.org>, Sebastien Badia <seb@sebian.fr>
+Build-Depends: cucumber,
+               debhelper (>= 9~),
+               gem2deb,
+               rake
+Standards-Version: 3.9.7
+Vcs-Git: https://anonscm.debian.org/git/pkg-ruby-extras/librarian-puppet.git
 Vcs-Browser: https://anonscm.debian.org/cgit/pkg-ruby-extras/librarian-puppet.git
 Homepage: https://github.com/rodjek/librarian-puppet
 XS-Ruby-Versions: all
@@ -17,12 +16,11 @@ XS-Ruby-Versions: all
 Package: librarian-puppet
 Architecture: all
 XB-Ruby-Versions: ${ruby:Versions}
-Depends:
- ${misc:Depends},
- puppet-common,
- ruby | ruby-interpreter,
- ruby-json,
- ruby-librarian,
+Depends: puppet-common,
+         ruby | ruby-interpreter,
+         ruby-json,
+         ruby-librarian,
+         ${misc:Depends}
 Description: bundler for your puppet modules
  Simplify deployment of your Puppet infrastructure by automatically pulling in
  modules from the forge and git repositories with a single command.

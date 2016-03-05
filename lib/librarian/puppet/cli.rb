@@ -2,10 +2,12 @@ require 'librarian/helpers'
 
 require 'librarian/cli'
 require 'librarian/puppet'
+require 'librarian/puppet/action'
 
 module Librarian
   module Puppet
     class Cli < Librarian::Cli
+      include Librarian::Puppet::Util
 
       module Particularity
         def root_module
@@ -44,12 +46,8 @@ module Librarian
       option "path", :type => :string
       option "destructive", :type => :boolean, :default => false
       option "local", :type => :boolean, :default => false
+      option "use-v1-api", :type => :boolean, :default => true
       def install
-
-        unless File.exist?('Puppetfile')
-          say "Could not find Puppetfile in #{Dir.pwd}", :red
-          exit 1
-        end
 
         ensure!
         clean! if options["clean"]
@@ -64,11 +62,18 @@ module Librarian
           environment.config_db.local["path"] = options["path"]
         end
 
+        environment.config_db.local['use-v1-api'] = options['use-v1-api'] ? '1' : nil
         environment.config_db.local['mode'] = options['local'] ? 'local' : nil
 
         resolve!
         debug { "Install: dependencies resolved"}
         install!
+      end
+
+      # only used to replace / to - in the module names
+      def update(*names)
+        warn("Usage of module/name is deprecated, use module-name") if names.any? {|n| n.include?("/")}
+        super(*names.map{|n| normalize_name(n)})
       end
 
       desc "package", "Cache the puppet modules in vendor/puppet/cache."
@@ -86,6 +91,17 @@ module Librarian
 
       def version
         say "librarian-puppet v#{Librarian::Puppet::VERSION}"
+      end
+
+      private
+
+      # override the actions to use our own
+
+      def install!(options = { })
+        Action::Install.new(environment, options).run
+      end
+      def resolve!(options = { })
+        Action::Resolve.new(environment, options).run
       end
     end
   end

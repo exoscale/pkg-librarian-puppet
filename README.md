@@ -7,12 +7,13 @@
 Librarian-puppet is a bundler for your puppet infrastructure.  You can use
 librarian-puppet to manage the puppet modules your infrastructure depends on,
 whether the modules come from the [Puppet Forge](https://forge.puppetlabs.com/),
-Git repositories or a just a path.
+Git repositories or just a path.
 
-* Librarian-puppet can reuse the dependencies listed in your Modulefile
+* Librarian-puppet can reuse the dependencies listed in your `Modulefile` or `metadata.json`
 * Forge modules can be installed from [Puppetlabs Forge](https://forge.puppetlabs.com/) or an internal Forge such as [Pulp](http://www.pulpproject.org/)
 * Git modules can be installed from a branch, tag or specific commit, optionally using a path inside the repository
 * Modules can be installed from GitHub using tarballs, without needing Git installed
+* Modules can be installed from a filesystem path
 * Module dependencies are resolved transitively without needing to list all the modules explicitly
 
 
@@ -28,74 +29,92 @@ It is based on [Librarian](https://github.com/applicationsonline/librarian), a
 framework for writing bundlers, which are tools that resolve, fetch, install,
 and isolate a project's dependencies.
 
+## Versions
+
+Librarian-puppet >= 2.0 (as well as 1.1, 1.2 and 1.3) requires Ruby 1.9 and uses the Puppet Forge API v3.
+Versions < 2.0 work on Ruby 1.8.
+
+See the [Changelog](Changelog.md) for more details.
+
 ## The Puppetfile
 
-Every Puppet repository that uses Librarian-puppet will have a file named
-`Puppetfile` in the root directory of that repository.  The full specification
-for which modules your puppet infrastructure repository  depends goes in here.
+Every Puppet repository that uses Librarian-puppet may have a file named
+`Puppetfile`, `metadata.json` or `Modulefile` in the root directory of that repository.
+The full specification
+for which modules your puppet infrastructure repository depends goes in here.
 
-### Simple Puppetfile
+### Simple usage
 
-This Puppetfile will download all the dependencies listed in your Modulefile from the Puppet Forge
+If no Puppetfile is present, `librarian-puppet` will download all the dependencies
+listed in your `metadata.json` or `Modulefile` from the Puppet Forge,
+as if the Puppetfile contained
 
-    forge "https://forge.puppetlabs.com"
+    forge "https://forgeapi.puppetlabs.com"
 
-    modulefile
+    metadata
 
 
 ### Example Puppetfile
 
-    forge "https://forge.puppetlabs.com"
+    forge "https://forgeapi.puppetlabs.com"
 
-    mod "puppetlabs/razor"
-    mod "puppetlabs/ntp", "0.0.3"
+    mod 'puppetlabs-razor'
+    mod 'puppetlabs-ntp', "0.0.3"
 
-    mod "puppetlabs/apt",
+    mod 'puppetlabs-apt',
       :git => "git://github.com/puppetlabs/puppetlabs-apt.git"
 
-    mod "puppetlabs/stdlib",
+    mod 'puppetlabs-stdlib',
       :git => "git://github.com/puppetlabs/puppetlabs-stdlib.git"
 
-    mod 'puppetlabs/apache', '0.6.0',
+    mod 'puppetlabs-apache', '0.6.0',
       :github_tarball => 'puppetlabs/puppetlabs-apache'
+
+    mod 'acme-mymodule', :path => './some_folder'
+
+    exclusion 'acme-bad_module'
 
 
 ### Recursive module dependency resolution
 
 When fetching a module all dependencies specified in its
-`Modulefile` and `Puppetfile` will be resolved and installed.
+`Modulefile`, `metadata.json` and `Puppetfile` will be resolved and installed.
 
 ### Puppetfile Breakdown
 
-    forge "https://forge.puppetlabs.com"
+    forge "https://forgeapi.puppetlabs.com"
 
 This declares that we want to use the official Puppet Labs Forge as our default
 source when pulling down modules.  If you run your own local forge, you may
 want to change this.
 
-    mod "puppetlabs/razor"
+    metadata
+
+Download all the dependencies listed in your `metadata.json` or `Modulefile` from the Puppet Forge.
+
+    mod 'puppetlabs-razor'
 
 Pull in the latest version of the Puppet Labs Razor module from the default
 source.
 
-    mod "puppetlabs/ntp", "0.0.3"
+    mod 'puppetlabs-ntp', "0.0.3"
 
 Pull in version 0.0.3 of the Puppet Labs NTP module from the default source.
 
-    mod "puppetlabs/apt",
+    mod 'puppetlabs-apt',
       :git => "git://github.com/puppetlabs/puppetlabs-apt.git"
 
 Our puppet infrastructure repository depends on the `apt` module from the
 Puppet Labs GitHub repos and checks out the `master` branch.
 
-    mod "puppetlabs/apt",
+    mod 'puppetlabs-apt',
       :git => "git://github.com/puppetlabs/puppetlabs-apt.git",
       :ref => '0.0.3'
 
 Our puppet infrastructure repository depends on the `apt` module from the
 Puppet Labs GitHub repos and checks out a tag of `0.0.3`.
 
-    mod "puppetlabs/apt",
+    mod 'puppetlabs-apt',
       :git => "git://github.com/puppetlabs/puppetlabs-apt.git",
       :ref => 'feature/master/dans_refactor'
 
@@ -117,12 +136,27 @@ with many modules in it. If we need a module from such a repository, we can
 use the `:path =>` option here to help Librarian-puppet drill down and find the
 module subdirectory.
 
-    mod "puppetlabs/apt",
+    mod 'puppetlabs-apt',
       :git => "git://github.com/fake/puppet-modules.git",
       :path => "modules/apt"
 
 Our puppet infrastructure repository depends on the `apt` module, which we have
 stored as a directory under our `puppet-modules` git repos.
+
+    mod 'puppetlabs-apache', '0.6.0',
+      :github_tarball => 'puppetlabs/puppetlabs-apache'
+
+Our puppet infrastructure repository depends on the `puppetlabs-apache` module,
+to be downloaded from GitHub tarball.
+
+    mod 'acme-mymodule', :path => './some_folder'
+
+Our puppet infrastructure repository depends on the `acme-mymodule` module,
+which is already in the filesystem.
+
+    exclusion 'acme-bad_module'
+
+Exclude the module `acme-bad_module` from resolution and installation.
 
 ## How to Use
 
@@ -153,6 +187,14 @@ This command looks at each `mod` declaration and fetches the module from the
 source specified.  This command writes the complete resolution into
 `Puppetfile.lock` and then copies all of the fetched modules into your
 `modules/` directory, overwriting whatever was there before.
+
+Librarian-puppet support both v1 and v3 of the Puppet Forge API.
+Specify a specific API version when installing modules:
+
+    $ librarian-puppet install --use-v1-api # this is default; ignored for official Puppet Forge
+    $ librarian-puppet install --no-use-v1-api # use the v3 API; default for official Puppet Forge
+
+Please note that this does not apply for the official Puppet Forge, where v3 is used by default.
 
 Get an overview of your `Puppetfile.lock` with:
 
@@ -221,7 +263,7 @@ and transforming it: replace hyphens (`-`) with underscores (`_`) and periods
 
 Configuration affects how various commands operate.
 
-* The `path` config sets the cookbooks directory to install to. If a relative
+* The `path` config sets the directory to install to. If a relative
   path, it is relative to the directory containing the `Puppetfile`. The
   equivalent environment variable is `LIBRARIAN_PUPPET_PATH`.
 
@@ -238,6 +280,28 @@ Configuration can be set by passing specific options to other commands.
   the environment or global config will be used.
 
 
+## Rsync Option
+
+The default convergence strategy between the cache and the module directory is
+to execute an `rm -r` on the module directory and just `cp -r` from the cache.
+This causes the module to be removed from the module path every time librarian
+puppet updates, regardless of whether the content has changed. This can cause
+some problems in environments with lots of change. The problem arises when the
+module directory gets removed while Puppet is trying to read files inside it.
+The `puppet master` process will lose its CWD and the catalog will fail to
+compile. To avoid this, you can use `rsync` to implement a more conservative
+convergence strategy. This will use `rsync` with the `-avz` and `--delete`
+flags instead of a `rm -r` and `cp -r`. To use this feature, just set the
+`rsync` configuration setting to `true`.
+
+    $ librarian-puppet config rsync true --global
+
+Alternatively, using an environment variable:
+
+    LIBRARIAN_PUPPET_RSYNC='true'
+
+Note that the directories will still be purged if you run librarian-puppet with
+the --clean or --destructive flags.
 
 ## How to Contribute
 

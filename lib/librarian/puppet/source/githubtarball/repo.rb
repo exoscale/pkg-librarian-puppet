@@ -25,7 +25,7 @@ module Librarian
             all_versions = data.map { |r| r['name'].gsub(/^v/, '') }.sort.reverse
 
             all_versions.delete_if do |version|
-              version !~ /\A\d\.\d(\.\d.*)?\z/
+              version !~ /\A\d+\.\d+(\.\d+.*)?\z/
             end
 
             @versions = all_versions.compact
@@ -40,15 +40,15 @@ module Librarian
           end
 
           def install_version!(version, install_path)
-            if environment.local? && !vendored?(source.uri.to_s, version)
+            if environment.local? && !vendored?(vendored_name, version)
               raise Error, "Could not find a local copy of #{source.uri} at #{version}."
             end
 
-            vendor_cache(source.uri.to_s, version) unless vendored?(source.uri.to_s, version)
+            vendor_cache(source.uri.to_s, version) unless vendored?(vendored_name, version)
 
             cache_version_unpacked! version
 
-            if install_path.exist?
+            if install_path.exist? && rsync? != true
               install_path.rmtree
             end
 
@@ -62,19 +62,19 @@ module Librarian
 
             path.mkpath
 
-            target = vendored?(source.uri.to_s, version) ? vendored_path(source.uri.to_s, version) : name
+            target = vendored?(vendored_name, version) ? vendored_path(vendored_name, version) : name
 
             Librarian::Posix.run!(%W{tar xzf #{target} -C #{path}})
           end
 
           def vendor_cache(name, version)
-            clean_up_old_cached_versions(name)
+            clean_up_old_cached_versions(vendored_name(name))
 
             url = "https://api.github.com/repos/#{name}/tarball/#{version}"
-            url << "?access_token=#{ENV['GITHUB_API_TOKEN']}" if ENV['GITHUB_API_TOKEN']
+            add_api_token_to_url(url)
 
             environment.vendor!
-            File.open(vendored_path(name, version).to_s, 'wb') do |f|
+            File.open(vendored_path(vendored_name(name), version).to_s, 'wb') do |f|
               begin
                 debug { "Downloading <#{url}> to <#{f.path}>" }
                 open(url,
@@ -90,9 +90,28 @@ module Librarian
           end
 
           def clean_up_old_cached_versions(name)
-            Dir["#{environment.vendor_cache}/#{name.sub('/', '-')}*.tar.gz"].each do |old_version|
+            Dir["#{environment.vendor_cache}/#{name}*.tar.gz"].each do |old_version|
               FileUtils.rm old_version
             end
+          end
+
+          def token_key_value
+            ENV[TOKEN_KEY]
+          end
+
+          def token_key_nil?
+            token_key_value.nil? || token_key_value.empty?
+          end
+
+          def add_api_token_to_url url
+            if token_key_nil?
+              debug { "#{TOKEN_KEY} environment value is empty or missing" }
+            elsif url.include? "?"
+              url << "&access_token=#{ENV[TOKEN_KEY]}"
+            else
+              url << "?access_token=#{ENV[TOKEN_KEY]}"
+            end
+            url
           end
 
         private
@@ -102,7 +121,7 @@ module Librarian
             url = "https://api.github.com#{path}?page=1&per_page=100"
             while true do
               debug { "  Module #{name} getting tags at: #{url}" }
-              url << "&access_token=#{ENV[TOKEN_KEY]}" if ENV[TOKEN_KEY]
+              add_api_token_to_url(url)
               response = http_get(url, :headers => {
                 "User-Agent" => "librarian-puppet v#{Librarian::Puppet::VERSION}"
               })
@@ -141,6 +160,10 @@ module Librarian
             request = Net::HTTP::Get.new(uri.request_uri)
             options[:headers].each { |k, v| request.add_field k, v }
             http.request(request)
+          end
+
+          def vendored_name(name = source.uri.to_s)
+            name.sub('/','-')
           end
         end
       end

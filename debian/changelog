@@ -1,3 +1,18 @@
+librarian-puppet (2.2.1-1) unstable; urgency=medium
+
+  [ Cédric Boutillier ]
+  * Bump debhelper compatibility level to 9
+  * Remove version in the gem2deb build-dependency
+  * Use https:// in Vcs-* fields
+  * Bump Standards-Version to 3.9.7 (no changes needed)
+  * Run wrap-and-sort on packaging files
+
+  [ Sebastien Badia ]
+  * Imported Upstream version 2.2.1 (Closes: #771067)
+  * d/control: add myself to uploaders
+
+ -- Sebastien Badia <seb@sebian.fr>  Sat, 05 Mar 2016 19:20:46 -0300
+
 librarian-puppet (1.0.3-2) unstable; urgency=medium
 
   * [ae2307a] Update Vcs-Browser URL
