@@ -1,3 +1,17 @@
+librarian-puppet (2.2.1-2) unstable; urgency=medium
+
+  [ Michael Moll ]
+  * Add patch to unbreak with ruby-puppet-forge 2.x
+
+  [ Sebastien Badia ]
+  * Add missing dependencys (Closes: #817124)
+  * d/patches: Refresh puppet_forge_2.1 and add missing DEP headers
+
+  [ Christian Hofstaedtler ]
+  * Add dependencies check to autopkgtest-pkg-ruby
+
+ -- Sebastien Badia <seb@sebian.fr>  Fri, 11 Mar 2016 22:23:02 -0300
+
 librarian-puppet (2.2.1-1) unstable; urgency=medium
 
   [ Cédric Boutillier ]
