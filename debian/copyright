@@ -1,9 +1,11 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: librarian-puppet
-Source: https://github.com/rodjek/librarian-puppet
+Source: https://github.com/voxpupuli/librarian-puppet
 
 Files: *
-Copyright: 2012 Tim Sharpe
+Copyright: 2012-2014 Tim Sharpe
+           2012-2014 Carlos Sanchez
+           2016 Voxpupuli Contributors
 License: Expat
 
 Files: debian/*

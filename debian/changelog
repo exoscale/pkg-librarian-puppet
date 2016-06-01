@@ -1,3 +1,15 @@
+librarian-puppet (2.2.3-1) unstable; urgency=medium
+
+  [ Sebastien Badia ]
+  * Update homepage and source according migration on Voxpupuli
+
+  [ Stig Sandbeck Mathisen ]
+  * Imported upstream release 2.2.3
+  * Declare compliance with Debian policy 3.9.8
+  * Drop patches included upstream
+
+ -- Stig Sandbeck Mathisen <ssm@debian.org>  Wed, 01 Jun 2016 22:27:33 +0200
+
 librarian-puppet (2.2.1-2) unstable; urgency=medium
 
   [ Michael Moll ]
