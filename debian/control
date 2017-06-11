@@ -1,12 +1,12 @@
 Source: librarian-puppet
 Maintainer: Debian Ruby Extras Maintainers <pkg-ruby-extras-maintainers@lists.alioth.debian.org>
 Uploaders: Stig Sandbeck Mathisen <ssm@debian.org>,
-           Sebastien Badia <seb@sebian.fr>
-Section: ruby
+           Sebastien Badia <sbadia@debian.org>
+Section: admin
 Testsuite: autopkgtest-pkg-ruby
 Priority: optional
 Build-Depends: cucumber,
-               debhelper (>= 9~),
+               debhelper (>= 10),
                gem2deb,
                rake,
                ruby-json,
@@ -21,7 +21,7 @@ XS-Ruby-Versions: all
 
 Package: librarian-puppet
 Architecture: all
-Depends: puppet-common,
+Depends: puppet,
          ruby | ruby-interpreter,
          ruby-json,
          ruby-librarian (>= 0.6.3~),

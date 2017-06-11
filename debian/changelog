@@ -1,3 +1,13 @@
+librarian-puppet (2.2.3-2) unstable; urgency=medium
+
+  * d/control:
+    + Fix package section (ruby → admin) (Closes: #832241)
+    + Puppet-common is now a dummy package (Closes: #858390)
+    + Use my Debian email
+    + Bump debhelper compat. to 10
+
+ -- Sebastien Badia <sbadia@debian.org>  Sun, 11 Jun 2017 19:28:50 +0200
+
 librarian-puppet (2.2.3-1) unstable; urgency=medium
 
   [ Sebastien Badia ]
