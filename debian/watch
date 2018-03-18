@@ -1,3 +1,2 @@
-version=3
-opts=dversionmangle=s/\+(?:ds|dfsg)$// \
-http://pkg-ruby-extras.alioth.debian.org/cgi-bin/gemwatch/librarian-puppet .*/librarian-puppet-(.*).tar.gz
+version=4
+https://github.com/voxpupuli/librarian-puppet/releases .*/v(.*).tar.gz

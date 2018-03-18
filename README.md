@@ -6,11 +6,11 @@
 
 Librarian-puppet is a bundler for your puppet infrastructure.  You can use
 librarian-puppet to manage the puppet modules your infrastructure depends on,
-whether the modules come from the [Puppet Forge](https://forge.puppetlabs.com/),
+whether the modules come from the [Puppet Forge](https://forge.puppet.com/),
 Git repositories or just a path.
 
 * Librarian-puppet can reuse the dependencies listed in your `Modulefile` or `metadata.json`
-* Forge modules can be installed from [Puppetlabs Forge](https://forge.puppetlabs.com/) or an internal Forge such as [Pulp](http://www.pulpproject.org/)
+* Forge modules can be installed from [Puppetlabs Forge](https://forge.puppet.com/) or an internal Forge such as [Pulp](http://www.pulpproject.org/)
 * Git modules can be installed from a branch, tag or specific commit, optionally using a path inside the repository
 * Modules can be installed from GitHub using tarballs, without needing Git installed
 * Modules can be installed from a filesystem path
@@ -31,8 +31,9 @@ and isolate a project's dependencies.
 
 ## Versions
 
-Librarian-puppet >= 2.0 (as well as 1.1, 1.2 and 1.3) requires Ruby 1.9 and uses the Puppet Forge API v3.
-Versions < 2.0 work on Ruby 1.8.
+Librarian-Puppet 3.0.0 and newer requires Ruby >= 2.0. Use version 2.2.4 if you need support for Puppet 3.7 or earlier, or Ruby 1.9 or earlier. Note that [Puppet 4.10 and newer require Ruby 2.1](https://puppet.com/docs/puppet/4.10/system_requirements.html#prerequisites) or newer.
+
+Librarian-Puppet 2.0.0 and newer requires Ruby >= 1.9 and uses Puppet Forge API v3. For Ruby 1.8 use 1.5.0.
 
 See the [Changelog](Changelog.md) for more details.
 
@@ -128,6 +129,11 @@ If we use a `:ref =>`, we can use anything that Git will recognize as a ref.
 This includes any branch name, tag name, SHA, or SHA unique prefix. If we use a
 branch, we can later ask Librarian-puppet to update the module by fetching the
 most recent version of the module from that same branch.
+
+Note that Librarian-puppet recognizes the [r10k Puppetfile's](https://github.com/puppetlabs/r10k/blob/master/doc/puppetfile.mkd) additional
+options, `:tag`, `:commit`, and `:branch`, but only as aliases for `:ref`.
+That is, there is no implementation of r10k's optimizations around fetching
+these different types of git objects.
 
 The Git source also supports a `:path =>` option. If we use the path option,
 Librarian-puppet will navigate down into the Git repository and only use the

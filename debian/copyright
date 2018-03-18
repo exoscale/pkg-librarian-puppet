@@ -1,15 +1,16 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: librarian-puppet
 Source: https://github.com/voxpupuli/librarian-puppet
 
 Files: *
 Copyright: 2012-2014 Tim Sharpe
            2012-2014 Carlos Sanchez
-           2016 Voxpupuli Contributors
+           2016-2018 Voxpupuli Contributors
 License: Expat
 
 Files: debian/*
 Copyright: 2013 Stig Sandbeck Mathisen <ssm@debian.org>
+           2014-2018 Sebastien Badia <sbadia@debian.org>
 License: Expat
 
 License: Expat
