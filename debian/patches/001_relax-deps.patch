@@ -1,0 +1,34 @@
+Description: Relax ruby-puppet-forge depencency
+Author: Sebastien Badia <sbadia@debian.org>
+Forwarded: not-needed
+Last-Update: 2021-02-04
+
+--- librarian-puppet-3.0.0.orig/librarian-puppet.gemspec
++++ librarian-puppet-3.0.0/librarian-puppet.gemspec
+@@ -31,7 +31,7 @@ Gem::Specification.new do |s|
+       s.add_development_dependency(%q<minitest>, ["~> 5"])
+       s.add_development_dependency(%q<mocha>, [">= 0"])
+       s.add_development_dependency(%q<puppet>, ["~> 5.2.0"])
+-      s.add_runtime_dependency(%q<puppet_forge>, ["~> 2.1"])
++      s.add_runtime_dependency(%q<puppet_forge>, [">= 2.1"])
+       s.add_development_dependency(%q<rake>, [">= 0"])
+       s.add_development_dependency(%q<rspec>, [">= 0"])
+       s.add_runtime_dependency(%q<rsync>, [">= 0"])
+@@ -43,7 +43,7 @@ Gem::Specification.new do |s|
+       s.add_dependency(%q<minitest>, ["~> 5"])
+       s.add_dependency(%q<mocha>, [">= 0"])
+       s.add_dependency(%q<puppet>, ["~> 5.2.0"])
+-      s.add_dependency(%q<puppet_forge>, ["~> 2.1"])
++      s.add_dependency(%q<puppet_forge>, [">= 2.1"])
+       s.add_dependency(%q<rake>, [">= 0"])
+       s.add_dependency(%q<rspec>, [">= 0"])
+       s.add_dependency(%q<rsync>, [">= 0"])
+@@ -56,7 +56,7 @@ Gem::Specification.new do |s|
+     s.add_dependency(%q<minitest>, ["~> 5"])
+     s.add_dependency(%q<mocha>, [">= 0"])
+     s.add_dependency(%q<puppet>, ["~> 5.2.0"])
+-    s.add_dependency(%q<puppet_forge>, ["~> 2.1"])
++    s.add_dependency(%q<puppet_forge>, [">= 2.1"])
+     s.add_dependency(%q<rake>, [">= 0"])
+     s.add_dependency(%q<rspec>, [">= 0"])
+     s.add_dependency(%q<rsync>, [">= 0"])

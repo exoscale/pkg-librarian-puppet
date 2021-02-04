@@ -1,3 +1,28 @@
+librarian-puppet (3.0.0-2) unstable; urgency=medium
+
+  [ Utkarsh Gupta ]
+  * Add salsa-ci.yml
+
+  [ Debian Janitor ]
+  * Trim trailing whitespace.
+  * Bump debhelper from old 11 to 12.
+  * Set debhelper-compat version in Build-Depends.
+  * Set upstream metadata fields: Bug-Database, Bug-Submit.
+  * Remove obsolete field Name from debian/upstream/metadata
+
+  [ Cédric Boutillier ]
+  * [ci skip] Update team name
+  * [ci skip] Add .gitattributes to keep unwanted files out of the source package
+
+  [ Sebastien Badia ]
+  * d/patches: Relax puppe-forge deps (Closes: #978225)
+  * d/control:
+    + Bump debhelper compatibility level to 13
+    + Bump Standards-Version to 4.5.1 (no changes needed)
+    + Added Rules-Requires-Root
+
+ -- Sebastien Badia <sbadia@debian.org>  Thu, 04 Feb 2021 17:07:11 +0100
+
 librarian-puppet (3.0.0-1) unstable; urgency=medium
 
   * New upstream version 3.0.0
