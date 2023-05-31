@@ -21,8 +21,7 @@ XS-Ruby-Versions: all
 
 Package: librarian-puppet
 Architecture: all
-Depends: puppet,
-         ruby | ruby-interpreter,
+Depends: ruby | ruby-interpreter,
          ruby-json,
          ruby-librarian (>= 0.6.3~),
          ruby-puppet-forge,
