@@ -1,3 +1,9 @@
+librarian-puppet (3.0.0-2+exo1) jammy; urgency=medium
+
+  * Remove `puppet` package runtime dependency.
+
+ -- Alexandros Afentoulis <alexandros.afentoulis@exoscale.ch>  Thu, 25 Jan 2024 11:11:12 +0200
+
 librarian-puppet (3.0.0-2) unstable; urgency=medium
 
   [ Utkarsh Gupta ]
