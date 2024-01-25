@@ -12,3 +12,6 @@ override_dh_auto_install:
 override_dh_compress:
 	dh_compress -O--buildsystem=ruby
 	mv -v debian/librarian-puppet/usr/share/man debian/librarian-puppet/usr/share/librarian-puppet/
+
+override_dh_builddeb:
+	dh_builddeb -- -Zxz
